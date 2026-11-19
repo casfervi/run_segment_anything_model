@@ -12,7 +12,7 @@ Further resources:
 
 ---
 
-README in Portuguese - README em portugu�s:
+README in Portuguese - README em português:
 
 [![pt-br](https://img.shields.io/badge/lang-pt--br-green.svg)](https://github.com/casfervi/run_segment_anything_model/blob/main/README_pt.md)
 
@@ -74,7 +74,7 @@ python run_sam3.py C:\path\video.mp4 video "rust"
 ```
 
 Multiple objects in the same video (runs one pass per prompt over each
-frame chunk — more prompts means more total time):
+frame chunk â€” more prompts means more total time):
 
 ```bash
 python run_sam3.py C:\path\video.mp4 video "rust,flange,pipe"
@@ -87,7 +87,7 @@ python run_sam3.py C:\path\image.jpg image "corrosion" C:\path\results
 ```
 
 Forcing CPU usage (e.g. if the GPU isn't compatible with the installed
-PyTorch build — only works in image mode, see notes below):
+PyTorch build â€” only works in image mode, see notes below):
 
 ```bash
 set SAM3_DEVICE=cpu
@@ -103,11 +103,11 @@ output/<prompt1>_<prompt2>_..._<YYYYMMDD_HHMMSS>/
 ```
 
 **Image mode:**
-- `mask_<prompt>_000.png`, `mask_<prompt>_001.png`, ... — one binary mask
+- `mask_<prompt>_000.png`, `mask_<prompt>_001.png`, ... â€” one binary mask
   per detection, prefixed with the prompt name
-- `annotated.png` — original image with bounding boxes for all prompts
+- `annotated.png` â€” original image with bounding boxes for all prompts
   drawn (one color per prompt)
-- `metadata.json` — prompts, boxes, scores, labels (which prompt produced
+- `metadata.json` â€” prompts, boxes, scores, labels (which prompt produced
   each detection), `n_detections_by_prompt`, and the list of generated
   files
 
@@ -120,10 +120,10 @@ at the root with the detection count per image.
 **Video mode:**
 - a subfolder `frame_00000/`, `frame_00001/`, ... for every frame with a
   detection, each with its masks (prefixed by prompt) and `annotated.png`
-- `annotated_video.mp4` — a video containing **every original frame**:
+- `annotated_video.mp4` â€” a video containing **every original frame**:
   frames with a detection show the drawn boxes, the rest are kept exactly
   as in the source video
-- `metadata.json` — prompts, total frame count, fps, chunk size used,
+- `metadata.json` â€” prompts, total frame count, fps, chunk size used,
   `n_detections_by_prompt`, and per-frame details
 
 > Annotating video frames requires `opencv-python`
@@ -132,23 +132,23 @@ at the root with the detection count per image.
 ## Long videos: chunked processing and environment variables
 
 Long videos make SAM3's session accumulate memory without bound during
-propagation (a known SAM3 bug — [issue #305](https://github.com/facebookresearch/sam3/issues/305)),
+propagation (a known SAM3 bug â€” [issue #305](https://github.com/facebookresearch/sam3/issues/305)),
 causing `CUDA out of memory` partway through the video even on GPUs with
 plenty of VRAM. To work around this, the script:
 
 1. **Splits the video into frame chunks** and processes each chunk in its
    own session, with `close_session` + `torch.cuda.empty_cache()` between
-   them — also reusing the already-extracted chunk JPEG to build the
+   them â€” also reusing the already-extracted chunk JPEG to build the
    annotated frame, instead of re-opening/decoding the source video again.
-2. Since that alone isn't enough for very long videos — the predictor
+2. Since that alone isn't enough for very long videos â€” the predictor
    still accumulates "stuck" memory between sessions, making processing
-   progressively slower until it stalls — the script also **rebuilds the
+   progressively slower until it stalls â€” the script also **rebuilds the
    `video_predictor` from scratch periodically**, every N sessions (each
-   chunk × each prompt counts as one session).
+   chunk Ã— each prompt counts as one session).
 
 Two environment variables control this behavior:
 
-- **`SAM3_CHUNK_FRAMES`** (default: `250`) — how many frames to process
+- **`SAM3_CHUNK_FRAMES`** (default: `250`) â€” how many frames to process
   per chunk. Lower it if you still run out of GPU memory within a single
   chunk. Chunks that are too small increase session-startup overhead
   (more frame/model loading calls).
@@ -156,7 +156,7 @@ Two environment variables control this behavior:
   set SAM3_CHUNK_FRAMES=150
   ```
 
-- **`SAM3_REBUILD_EVERY`** (default: `10`) — how many sessions between
+- **`SAM3_REBUILD_EVERY`** (default: `10`) â€” how many sessions between
   full rebuilds of the `video_predictor`. This makes the overall run a
   bit slower (reloading the model takes a few seconds each time), but
   prevents stalling from accumulated memory on long videos or with many
@@ -180,7 +180,7 @@ python run_sam3.py C:\path\video.mp4 video "rust,flange"
   cloned SAM3 repository (https://github.com/facebookresearch/sam3), i.e.
   the `sam3\` folder (the model's Python package, e.g.
   `sam3\model_builder.py`) needs to sit in the same directory you run
-  `python run_sam3.py ...` from — that's what makes
+  `python run_sam3.py ...` from â€” that's what makes
   `from sam3.model_builder import ...` work. If you'd rather run it from
   anywhere, install the package into the environment with
   `pip install -e .` from inside the cloned repository folder.
@@ -193,7 +193,7 @@ python run_sam3.py C:\path\video.mp4 video "rust,flange"
   set HF_TOKEN=hf_lettersandnumbers
   ```
 - **`triton` on Windows**: SAM3's video tracker depends on the `triton`
-  package. On Windows, the official PyPI package doesn't work — use the
+  package. On Windows, the official PyPI package doesn't work â€” use the
   Windows-specific build instead:
   ```bash
   pip install -U triton-windows
@@ -206,11 +206,11 @@ python run_sam3.py C:\path\video.mp4 video "rust,flange"
   to CPU automatically in image mode, with a warning in the terminal.
 - **Video mode requires a CUDA GPU**: unlike image mode, SAM3's
   `video_predictor` has no CPU/MPS support yet (it's implemented
-  internally with CUDA/NCCL — [issue #164](https://github.com/facebookresearch/sam3/issues/164)).
+  internally with CUDA/NCCL â€” [issue #164](https://github.com/facebookresearch/sam3/issues/164)).
   `SAM3_DEVICE=cpu` does not work for video.
 - **Multiple prompts in video mode**: each prompt runs in its own session
   over the same extracted frames (mixing multiple prompts in the same
-  video session is unstable in current SAM3 —
+  video session is unstable in current SAM3 â€”
   [issue #206](https://github.com/facebookresearch/sam3/issues/206)), so
   total runtime scales with the number of requested objects.
 
